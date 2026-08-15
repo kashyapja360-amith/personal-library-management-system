@@ -28,7 +28,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Flutter Web
-        run: flutter build web --release
+        run: flutter build web --release --base-href "/personal-library-management-system/"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
