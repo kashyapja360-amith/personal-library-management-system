@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import '../models/book.dart';
 import 'scanner_screen.dart';
+import '../services/backup_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,6 +17,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Book> _books = [];
 final TextEditingController _searchController = TextEditingController();
 String _searchQuery = '';
+
+final BackupService _backupService = BackupService();
 
 List<Book> get _filteredBooks {
   if (_searchQuery.isEmpty) {
@@ -187,9 +190,64 @@ Future<void> _deleteBook(Book book) async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Personal Library Management System'),
-      ),
+appBar: AppBar(
+  title: const Text('Personal Library Management System'),
+  actions: [
+    IconButton(
+      icon: const Icon(Icons.download),
+      tooltip: 'Export Library',
+      onPressed: () async {
+        await _backupService.exportLibrary();
+
+        if (!mounted) {
+          return;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Library backup exported successfully.'),
+          ),
+        );
+      },
+    ),
+    IconButton(
+  icon: const Icon(Icons.upload),
+  tooltip: 'Import Library',
+  onPressed: () async {
+    try {
+      final importedCount =
+          await _backupService.importLibrary();
+
+      _loadBooks();
+
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            importedCount == 0
+                ? 'No new books were imported.'
+                : '$importedCount book(s) imported successfully.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Import failed: $e'),
+        ),
+      );
+    }
+  },
+),
+  ],
+),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
