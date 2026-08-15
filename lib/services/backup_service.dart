@@ -29,21 +29,17 @@ class BackupService {
     );
   }
 
-  Future<int> importLibrary() async {
-final result = await FilePicker.pickFiles(
-          type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
+Future<int> importLibrary() async {
+  final result = await FilePicker.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['json'],
+  );
 
-    if (result == null) {
-      return 0;
-    }
+  if (result.isEmpty) {
+    return 0;
+  }
 
-final fileBytes = await result.first.readAsBytes();
-
-    if (fileBytes == null) {
-      throw Exception('Could not read the selected backup file.');
-    }
+  final fileBytes = await result.first.readAsBytes();
 
     final jsonString = utf8.decode(fileBytes);
 
